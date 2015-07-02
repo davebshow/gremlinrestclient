@@ -1,8 +1,13 @@
-gremlinrestclient package
-=========================
+API
+===
 
-Submodules
-----------
+Module contents
+---------------
+
+.. automodule:: gremlinrestclient
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 gremlinrestclient.client module
 -------------------------------
@@ -30,12 +35,3 @@ gremlinrestclient.exceptions module
     :undoc-members:
     :show-inheritance:
     :inherited-members:
-
-
-Module contents
----------------
-
-.. automodule:: gremlinrestclient
-    :members:
-    :undoc-members:
-    :show-inheritance:
