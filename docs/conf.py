@@ -196,7 +196,7 @@ html_sidebars = {
 #html_file_suffix = None
 html_theme_options = {
     # 'logo': 'logo.png',
-    'description': 'Rest client for the TP3 Gremlin Server',
+    'description': 'REST client for the TP3 Gremlin Server',
     'logo_text_align': 'left',
     'github_user': 'davebshow',
     'github_repo': 'gremlinrestclient',
