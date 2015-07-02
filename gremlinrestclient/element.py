@@ -1,86 +1,6 @@
-class CommandsMixin(object):
-    """
-    Some useful commands for the Gremlin Server.
-    """
+"""Classes for interacting with the Gremlin Server"""
 
-    def add_vertex(self, label=None):
-        """
-        Adds a new vertex to the graph.
-
-        :params str label: Node label (optional)
-
-        :returns: The created :py:class:`gremlinrestclient.commands.Vertex`
-        """
-
-        if label is not None:
-            script = """graph.addVertex(label, vertex_label)"""
-            bindings = {"vertex_label": label}
-        else:
-            script = """graph.addVertex()"""
-            bindings = {}
-        resp = self.execute(script, bindings=bindings)
-        vertex = self.make_elem(resp, Vertex)
-        return vertex
-
-    def vertex(self, vid):
-        """Get an existing vertex from the graph
-
-        :params int vid: Unique node identifier
-        :returns: The requested :py:class:`gremlinrestclient.commands.Vertex`
-            or None
-        """
-        script = """g.V(vid)"""
-        bindings = {"vid": vid}
-        resp = self.execute(script, bindings=bindings)
-        vertex = self.make_elem(resp, Vertex)
-        return vertex
-
-    def make_elem(self, resp, elem_class):
-        try:
-            data = resp.data[0]
-        except IndexError:
-            elem = None
-        else:
-            elem = elem_class(data, self)
-        return elem
-
-    def vertices(self):
-        """
-        Get all vertices in graph.
-
-        :returns: :py:class:`list` of
-            :py:class:`gremlinrestclient.commands.Vertex` objects
-        """
-        script = """g.V()"""
-        resp = self.execute(script)
-        vertices = [Vertex(v, self) for v in resp.data]
-        return vertices
-
-    def edge(self, eid):
-        """Retrieves an existing edge from the graph
-
-        :params str eid: Unique edge identifier
-
-        :returns: The requested :py:class:`gremlinrestclient.commands.Edge`
-            or None
-        """
-        # Bindings don't seem to work here...
-        script = """g.E(%s)""" % (eid)
-        resp = self.execute(script)
-        edge = self.make_elem(resp, Edge)
-        return edge
-
-    def edges(self):
-        """
-        Get all edges in graph.
-
-        :returns: :py:class:`list` of
-            :py:class:`gremlinrestclient.commands.Edge`
-        """
-        script = """g.E()"""
-        resp = self.execute(script)
-        edges = [Edge(e, self) for e in resp.data]
-        return edges
+__all__ = ("Vertex", "Edge")
 
 
 class Element(object):
@@ -134,9 +54,9 @@ class Element(object):
             script, bindings = self._set_property_script(key, value)
             resp = self._gdb.execute(script, bindings=bindings)
             if self._type == "vertex":
-                output = self._gdb.make_elem(resp, Vertex)
+                output = self._gdb._make_elem(resp, Vertex)
             else:
-                output = self._gdb.make_elem(resp, Edge)
+                output = self._gdb._make_elem(resp, Edge)
         else:
             output = self.values(key)
         return output
@@ -184,12 +104,12 @@ class Vertex(Element):
                     vert1.addEdge(lab, vert2)"""
         bindings = {"lab": label, "vid1": self._eid, "vid2": vertex.id}
         resp = self._gdb.execute(script, bindings=bindings)
-        return self._gdb.make_elem(resp, Edge)
+        return self._gdb._make_elem(resp, Edge)
 
     def out_edges(self):
         """Gets all the outgoing edges of the node.
 
-        :returns: A list of :py:class:`gremlinrestclient.commands.Edge`
+        :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
         script = """%s; elem.outE()""" % (self._get_script())
         resp = self._gdb.execute(script)
@@ -198,7 +118,7 @@ class Vertex(Element):
     def in_edges(self):
         """Gets all the outgoing edges of the node.
 
-        :returns: A list of :py:class:`gremlinrestclient.commands.Edge`
+        :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
         script = """%s; elem.inE()""" % (self._get_script())
         resp = self._gdb.execute(script)
@@ -209,7 +129,7 @@ class Vertex(Element):
 
         :param str label: Label to filter the edges (optional)
 
-        :returns: A list of :py:class:`gremlinrestclient.commands.Edge`
+        :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
         script = """%s; elem.bothE()""" % (self._get_script())
         resp = self._gdb.execute(script)
@@ -236,19 +156,22 @@ class Edge(Element):
         """
         Returns the origin Vertex of the relationship.
 
-        :returns: The origin :py:class:`gremlinrestclient.commands.Vertex`"""
+        :returns: The origin
+            :py:class:`Vertex<gremlinrestclient.element.Vertex>`
+        """
         return self._get_vertex(self._out_vertex)
 
     def in_vertex(self):
         """
         Returns the target Vertex of the relationship.
 
-        :returns: The target :py:class:`gremlinrestclient.commands.Vertex`"""
+        :returns: The target
+            :py:class:`Vertex<gremlinrestclient.element.Vertex>`"""
         return self._get_vertex(self._in_vertex)
 
     def _get_vertex(self, vid):
         script = """g.V(vid)"""
         bindings = {"vid": vid}
         resp = self._gdb.execute(script, bindings=bindings)
-        vertex = self._gdb.make_elem(resp, Vertex)
+        vertex = self._gdb._make_elem(resp, Vertex)
         return vertex

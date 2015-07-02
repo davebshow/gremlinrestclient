@@ -18,10 +18,10 @@ gremlinrestclient.client module
     :show-inheritance:
     :inherited-members:
 
-gremlinrestclient.commands module
+gremlinrestclient.element module
 ---------------------------------
 
-.. automodule:: gremlinrestclient.commands
+.. automodule:: gremlinrestclient.element
     :members:
     :undoc-members:
     :show-inheritance:
