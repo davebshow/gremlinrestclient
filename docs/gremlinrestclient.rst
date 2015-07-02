@@ -1,8 +1,8 @@
 API
 ===
 
-Module contents
----------------
+gremlinrestclient module
+------------------------
 
 .. automodule:: gremlinrestclient
     :members:
@@ -34,4 +34,3 @@ gremlinrestclient.exceptions module
     :members:
     :undoc-members:
     :show-inheritance:
-    :inherited-members:

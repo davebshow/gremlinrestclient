@@ -24,7 +24,7 @@ The latest release of :py:mod:`gremlinrestclient` is **0.0.1**.
 Requirements
 ============
 
-- Python 3.4
+- Python 2.7-3.4
 - Tinkerpop 3 Gremlin Server 3.0.0.M9
 
 
