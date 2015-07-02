@@ -31,12 +31,12 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
         self.client = GraphDatabase()
 
     def test_create_node(self):
-        resp = self.client.add_vertex()
-        # print(resp)
+        vertex = self.client.add_vertex()
+        self.assertIsNotNone(vertex)
 
     def test_create_node_label(self):
-        resp = self.client.add_vertex("test")
-        # print(resp)
+        vertex = self.client.add_vertex("test")
+        self.assertEqual(vertex.label, "test")
 
     def test_get_vertex(self):
         v = self.client.vertex(1)
@@ -51,16 +51,16 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
         self.assertIsNotNone(vs)
 
     def test_get_edge(self):
-        resp = self.client.edge(7)
-        # print(resp)
+        edge = self.client.edge(7)
+        self.assertEqual(edge.id, 7)
 
     def test_get_edge_id_doesntexist(self):
-        resp = self.client.edge(10000)
-        # print(resp)
+        vertex = self.client.edge(10000)
+        self.assertIsNone(vertex)
 
     def test_get_edges(self):
         resp = self.client.edges()
-        # print([r.id for r in resp])
+        self.assertTrue(len(resp) > 0)
 
     def test_get_node_property(self):
         v = self.client.vertex(1)
@@ -83,7 +83,7 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
         p = e.property('weight')
         self.assertEqual(p, 0.5)
 
-    def test_set_node_property(self):
+    def test_set_edge_property(self):
         e = self.client.edge(7)
         e.property('weight', 1.0)
         e = self.client.edge(7)
@@ -101,6 +101,30 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
         self.assertEqual(out.id, 1)
         inv = edge.in_vertex()
         self.assertEqual(inv.id, 2)
+
+    def test_edge_create(self):
+        node1 = self.client.add_vertex()
+        id1 = node1.id
+        node2 = self.client.add_vertex()
+        id2 = node2.id
+        edge = node1.add_edge("knows", node2)
+        self.assertEqual(edge.out_vertex().id, id1)
+        self.assertEqual(edge.in_vertex().id, id2)
+
+    def test_out_edges(self):
+        node = self.client.vertex(1)
+        resp = node.out_edges()
+        self.assertEqual(len(resp), 3)
+
+    def test_in_edges(self):
+        node = self.client.vertex(3)
+        resp = node.in_edges()
+        self.assertEqual(len(resp), 3)
+
+    def test_both_edges(self):
+        node = self.client.vertex(3)
+        resp = node.edges()
+        self.assertEqual(len(resp), 3)
 
 
 if __name__ == "__main__":

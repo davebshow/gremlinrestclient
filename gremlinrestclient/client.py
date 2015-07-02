@@ -22,6 +22,15 @@ class GremlinRestClient:
         self._url = url
 
     def execute(self, gremlin, bindings=None, lang="gremlin-groovy"):
+        """
+        Send a script to the Gremlin Server
+
+        :param str gremlin: The script to send.
+        :param dict bindings: Bindings for the Gremlin Script.
+        :param str lang: Gremlin language variant.
+
+        :returns: :py:class:`gremlinrestclient.client.Response`
+        """
         if bindings is None:
             bindings = {}
         payload = {
