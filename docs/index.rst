@@ -7,7 +7,13 @@
 gremlinrestclient
 =================
 
-A HTTP client for the Gremlin Server
+A HTTP client for the Gremlin Server.
+
+**Features:**
+
+- An easy to use client class :py:class:`GremlinRestClient<gremlinrestclient.client.GremlinRestClient>` that allows you to submit scripts to the Gremlin Server.
+
+- A higher-level class :py:class:`GraphDatabase<gremlinrestclient.client.GraphDatabase>` that provides and object oriented API for creating and accessing nodes and edges.
 
 
 Releases
@@ -36,10 +42,9 @@ Install using pip::
 Getting Started
 ===============
 
-:py:mod:`gremlinrestclient` includes a simple client
-:py:class:`gremlinrestclient.client.GremlinRestClient` to submit scripts to the
-server. It also has a higher level OO graph interface accessible through
-:py:class:`gremlinrestclient.client.GraphDatabase`.
+Use the simple client:
+:py:class:`GremlinRestClient<gremlinrestclient.client.GremlinRestClient>`.
+
 
 Minimal Example
 ---------------
