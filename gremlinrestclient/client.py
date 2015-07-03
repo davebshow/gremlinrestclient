@@ -145,6 +145,5 @@ class GraphDatabase(GremlinRestClient):
         """
         script = """g.E()"""
         resp = self.execute(script)
-        print(resp)
         edges = [self._edge_class(e, self) for e in resp.data]
         return edges
