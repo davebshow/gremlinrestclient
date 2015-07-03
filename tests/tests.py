@@ -30,6 +30,23 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
     def setUp(self):
         self.client = GraphDatabase()
 
+    def test1_build_graph(self):
+        script = """
+            marko = graph.addVertex(label, "person", "name", "marko", "age", 29);
+            vadas = graph.addVertex(label, "person", "name", "vadas", "age", 27);
+            lop = graph.addVertex(label, "software", "name", "lop", "lang", "java");
+            josh = graph.addVertex(label, "person", "name", "josh", "age", 32);
+            ripple = graph.addVertex(label, "software", "name", "ripple", "lang", "java");
+            peter = graph.addVertex(label, "person", "name", "peter", "age", 35);
+            marko.addEdge("knows", vadas, "weight", 0.5);
+            marko.addEdge("knows", josh, "weight", 1.0);
+            marko.addEdge("created", lop, "weight", 0.4);
+            josh.addEdge("created", ripple, "weight", 1.0);
+            josh.addEdge("created", lop, "weight", 0.4);
+            peter.addEdge("created", lop, "weight", 0.2);
+        """
+        self.client.execute(script)
+
     def test_create_node(self):
         vertex = self.client.add_vertex()
         self.assertIsNotNone(vertex)
@@ -151,11 +168,11 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
         self.assertEqual(edge.out_vertex().id, vid)
         self.assertEqual(edge.in_vertex().id, vid2)
         # Test with real db
-        # edge = self.client.edge(eid)
-        # self.assertEqual(edge.id, eid)
-        # edge.remove()
-        # edge = self.client.edge(eid)
-        # self.assertIsNone(edge)
+        edge = self.client.edge(eid)
+        self.assertEqual(edge.id, eid)
+        edge.remove()
+        edge = self.client.edge(eid)
+        self.assertIsNone(edge)
 
     def test_remove_property(self):
         node = self.client.add_vertex()
@@ -189,9 +206,9 @@ class PyblueprintsTestCase(unittest.TestCase):
         v2 = self.client.addVertex()
         edge = self.client.addEdge(v1, v2, "knows")
         # Wierd
-        # eid = edge.id
-        # e = self.client.getEdge(eid)
-        # self.assertEqual(eid, e.id)
+        eid = edge.id
+        e = self.client.getEdge(eid)
+        self.assertEqual(eid, e.id)
 
     def test_getEdge(self):
         e = self.client.getEdge(7)
@@ -220,11 +237,11 @@ class PyblueprintsTestCase(unittest.TestCase):
         self.assertEqual(edge.getOutVertex().id, vid)
         self.assertEqual(edge.getInVertex().id, vid2)
         # Test with real db
-        # edge = self.client.getEdge(eid)
-        # self.assertEqual(edge.id, eid)
-        # edge.remove()
-        # edge = self.client.getEdge(eid)
-        # self.assertIsNone(edge)
+        edge = self.client.getEdge(eid)
+        self.assertEqual(edge.id, eid)
+        edge.remove()
+        edge = self.client.getEdge(eid)
+        self.assertIsNone(edge)
 
     def test_getPropertysetProperty(self):
         node = self.client.getVertex(1)

@@ -36,7 +36,7 @@ class Element(object):
 
     def _get_script(self):
         # Bindings acting wierd for edge lookups...
-        script = """elem = g.%s(%s)""" % (self._source, self._eid)
+        script = """elem = g.%s().has(id, %s)""" % (self._source, self._eid)
         return script
 
     def values(self, prop):
@@ -117,7 +117,7 @@ class Vertex(Element):
     def add_edge(self, label, vertex):
         script = """vert1 = g.V(vid1).next();
                     vert2 = g.V(vid2).next();
-                    vert1.addEdge(lab, vert2)"""
+                    vert1.addEdge(lab, vert2, "type", "test")"""
         bindings = {"lab": label, "vid1": self._eid, "vid2": vertex.id}
         resp = self._gdb.execute(script, bindings=bindings)
         return self._gdb._make_elem(resp, self._edge_class)

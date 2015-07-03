@@ -131,8 +131,10 @@ class GraphDatabase(GremlinRestClient):
             :py:class:`Edge<gremlinrestclient.element.Edge>` or None
         """
         # Bindings don't seem to work here...
-        script = """g.E(%s)""" % (eid)
-        resp = self.execute(script)
+        script = """g.E().has(id, eid)"""
+        bindings = {"eid": eid}
+        resp = self.execute(script, bindings=bindings)
+
         edge = self._make_elem(resp, self._edge_class)
         return edge
 
