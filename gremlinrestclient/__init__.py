@@ -1,3 +1,4 @@
+from gremlinrestclient.pyblueprints import *
 from gremlinrestclient.client import *
-from gremlinrestclient.exceptions import *
 from gremlinrestclient.element import *
+from gremlinrestclient.exceptions import *

@@ -14,7 +14,7 @@ Response = collections.namedtuple(
     ["status_code", "data", "message", "metadata"])
 
 
-class GremlinRestClient:
+class GremlinRestClient(object):
 
     HEADERS = {'content-type': 'application/json'}
 
@@ -62,6 +62,12 @@ class GraphDatabase(GremlinRestClient):
     """
     A high level interface for the Gremlin Server.
     """
+    def __init__(self, url="http://localhost:8182", edge_class=Edge,
+                 vertex_class=Vertex):
+        super(GraphDatabase, self).__init__(url=url)
+        self._edge_class = edge_class
+        self._vertex_class = vertex_class
+
     def add_vertex(self, label=None):
         """
         Adds a new vertex to the graph.
@@ -79,7 +85,7 @@ class GraphDatabase(GremlinRestClient):
             script = """graph.addVertex()"""
             bindings = {}
         resp = self.execute(script, bindings=bindings)
-        vertex = self._make_elem(resp, Vertex)
+        vertex = self._make_elem(resp, self._vertex_class)
         return vertex
 
     def vertex(self, vid):
@@ -92,7 +98,7 @@ class GraphDatabase(GremlinRestClient):
         script = """g.V(vid)"""
         bindings = {"vid": vid}
         resp = self.execute(script, bindings=bindings)
-        vertex = self._make_elem(resp, Vertex)
+        vertex = self._make_elem(resp, self._vertex_class)
         return vertex
 
     def _make_elem(self, resp, elem_class):
@@ -113,7 +119,7 @@ class GraphDatabase(GremlinRestClient):
         """
         script = """g.V()"""
         resp = self.execute(script)
-        vertices = [Vertex(v, self) for v in resp.data]
+        vertices = [self._vertex_class(v, self) for v in resp.data]
         return vertices
 
     def edge(self, eid):
@@ -127,7 +133,7 @@ class GraphDatabase(GremlinRestClient):
         # Bindings don't seem to work here...
         script = """g.E(%s)""" % (eid)
         resp = self.execute(script)
-        edge = self._make_elem(resp, Edge)
+        edge = self._make_elem(resp, self._edge_class)
         return edge
 
     def edges(self):
@@ -139,5 +145,6 @@ class GraphDatabase(GremlinRestClient):
         """
         script = """g.E()"""
         resp = self.execute(script)
-        edges = [Edge(e, self) for e in resp.data]
+        print(resp)
+        edges = [self._edge_class(e, self) for e in resp.data]
         return edges

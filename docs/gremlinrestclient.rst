@@ -27,6 +27,14 @@ gremlinrestclient.element module
     :show-inheritance:
     :inherited-members:
 
+gremlinrestclient.pyblueprints module
+-------------------------------
+
+.. automodule:: gremlinrestclient.pyblueprints
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gremlinrestclient.exceptions module
 -----------------------------------
 

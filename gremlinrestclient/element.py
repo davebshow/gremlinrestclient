@@ -13,10 +13,18 @@ class Element(object):
         self._type = element_data["type"]
         self._label = element_data["label"]
         self._source = ""
+        self._vertex_class = self._gdb._vertex_class
+        self._edge_class = self._gdb._edge_class
 
     @property
     def label(self):
         return self._label
+
+    def __str__(self):
+        return "{0}: {1}".format(self._type, self._eid)
+
+    def __repr__(self):
+        return "{0}: {1}".format(self._type, self._eid)
 
     @property
     def id(self):
@@ -28,12 +36,11 @@ class Element(object):
 
     def _get_script(self):
         # Bindings acting wierd for edge lookups...
-        script = """elem = g.%s(%s);""" % (self._source, self._eid)
+        script = """elem = g.%s(%s)""" % (self._source, self._eid)
         return script
 
     def values(self, prop):
-        get_script = self._get_script()
-        script = """%selem.values(prop);""" % (get_script)
+        script = """%s;elem.values(prop);""" % (self._get_script())
         bindings = {"prop": prop}
         resp = self._gdb.execute(script, bindings=bindings)
         try:
@@ -41,6 +48,17 @@ class Element(object):
         except IndexError:
             prop = None
         return prop
+
+    def remove_property(self, key):
+        """
+        Remove an element property.
+
+        :param str key: The property to remove.
+        """
+        script = """%s;elem.next().property(prop).remove();
+                 """ % (self._get_script())
+        bindings = {"prop": key}
+        self._gdb.execute(script, bindings=bindings)
 
     def property(self, key, value=None):
         """Gets/sets the value of the property for the given key
@@ -54,16 +72,15 @@ class Element(object):
             script, bindings = self._set_property_script(key, value)
             resp = self._gdb.execute(script, bindings=bindings)
             if self._type == "vertex":
-                output = self._gdb._make_elem(resp, Vertex)
+                output = self._gdb._make_elem(resp, self._vertex_class)
             else:
-                output = self._gdb._make_elem(resp, Edge)
+                output = self._gdb._make_elem(resp, self._edge_class)
         else:
             output = self.values(key)
         return output
 
     def _set_property_script(self, prop, value):
-        get_script = self._get_script()
-        script = """%selem.property(prop, val);""" % (get_script)
+        script = """%s;elem.property(prop, val);""" % (self._get_script())
         bindings = {"prop": prop, "val": value}
         return script, bindings
 
@@ -81,8 +98,7 @@ class Element(object):
         return self._eid
 
     def remove(self):
-        get_script = self._get_script()
-        script = """%s;elem.remove;""" % (get_script)
+        script = """%s.next();elem.remove();""" % (self._get_script())
         self._gdb.execute(script)
 
 
@@ -104,25 +120,22 @@ class Vertex(Element):
                     vert1.addEdge(lab, vert2)"""
         bindings = {"lab": label, "vid1": self._eid, "vid2": vertex.id}
         resp = self._gdb.execute(script, bindings=bindings)
-        return self._gdb._make_elem(resp, Edge)
+        return self._gdb._make_elem(resp, self._edge_class)
 
-    def out_edges(self):
+    # Implement label filter
+    def out_edges(self, label=None):
         """Gets all the outgoing edges of the node.
 
         :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
-        script = """%s; elem.outE()""" % (self._get_script())
-        resp = self._gdb.execute(script)
-        return [Edge(e, self._gdb) for e in resp.data]
+        return self._edges("out", label=label)
 
-    def in_edges(self):
+    def in_edges(self, label=None):
         """Gets all the outgoing edges of the node.
 
         :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
-        script = """%s; elem.inE()""" % (self._get_script())
-        resp = self._gdb.execute(script)
-        return [Edge(e, self._gdb) for e in resp.data]
+        return self._edges("in", label=label)
 
     def edges(self, label=None):
         """Gets all the outgoing edges of the node.
@@ -131,9 +144,18 @@ class Vertex(Element):
 
         :returns: A list of :py:class:`Edge<gremlinrestclient.element.Edge>`
         """
-        script = """%s; elem.bothE()""" % (self._get_script())
-        resp = self._gdb.execute(script)
-        return [Edge(e, self._gdb) for e in resp.data]
+        return self._edges("both", label=label)
+
+    def _edges(self, pattern, label=None):
+
+        if label is None:
+            script = """%s; elem.%sE()""" % (self._get_script(), pattern)
+            resp = self._gdb.execute(script)
+        else:
+            script = """%s; elem.%pE(l)""" % (self._get_script(), pattern)
+            bindings = {"l": label}
+            resp = self._gdb.execute(script, bindings=bindings)
+        return [self._edge_class(e, self._gdb) for e in resp.data]
 
 
 class Edge(Element):
@@ -173,5 +195,5 @@ class Edge(Element):
         script = """g.V(vid)"""
         bindings = {"vid": vid}
         resp = self._gdb.execute(script, bindings=bindings)
-        vertex = self._gdb._make_elem(resp, Vertex)
+        vertex = self._gdb._make_elem(resp, self._vertex_class)
         return vertex
