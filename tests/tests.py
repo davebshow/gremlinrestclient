@@ -30,23 +30,6 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
     def setUp(self):
         self.client = GraphDatabase()
 
-    def test1_build_graph(self):
-        script = """
-            marko = graph.addVertex(label, "person", "name", "marko", "age", 29);
-            vadas = graph.addVertex(label, "person", "name", "vadas", "age", 27);
-            lop = graph.addVertex(label, "software", "name", "lop", "lang", "java");
-            josh = graph.addVertex(label, "person", "name", "josh", "age", 32);
-            ripple = graph.addVertex(label, "software", "name", "ripple", "lang", "java");
-            peter = graph.addVertex(label, "person", "name", "peter", "age", 35);
-            marko.addEdge("knows", vadas, "weight", 0.5);
-            marko.addEdge("knows", josh, "weight", 1.0);
-            marko.addEdge("created", lop, "weight", 0.4);
-            josh.addEdge("created", ripple, "weight", 1.0);
-            josh.addEdge("created", lop, "weight", 0.4);
-            peter.addEdge("created", lop, "weight", 0.2);
-        """
-        self.client.execute(script)
-
     def test_create_node(self):
         vertex = self.client.add_vertex()
         self.assertIsNotNone(vertex)

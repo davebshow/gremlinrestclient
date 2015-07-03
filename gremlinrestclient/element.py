@@ -34,14 +34,9 @@ class Element(object):
     def properties(self):
         return self._properties
 
-    def _get_script(self):
-        # Bindings acting wierd for edge lookups...
-        script = """elem = g.%s().has(id, %s)""" % (self._source, self._eid)
-        return script
-
     def values(self, prop):
         script = """%s;elem.values(prop);""" % (self._get_script())
-        bindings = {"prop": prop}
+        bindings = {"prop": prop, "eid": self._eid}
         resp = self._gdb.execute(script, bindings=bindings)
         try:
             prop = resp.data[0]
@@ -57,7 +52,7 @@ class Element(object):
         """
         script = """%s;elem.next().property(prop).remove();
                  """ % (self._get_script())
-        bindings = {"prop": key}
+        bindings = {"prop": key, "eid": self._eid}
         self._gdb.execute(script, bindings=bindings)
 
     def property(self, key, value=None):
@@ -81,7 +76,7 @@ class Element(object):
 
     def _set_property_script(self, prop, value):
         script = """%s;elem.property(prop, val);""" % (self._get_script())
-        bindings = {"prop": prop, "val": value}
+        bindings = {"prop": prop, "val": value, "eid": self._eid}
         return script, bindings
 
     def keys(self):
@@ -99,7 +94,8 @@ class Element(object):
 
     def remove(self):
         script = """%s.next();elem.remove();""" % (self._get_script())
-        self._gdb.execute(script)
+        bindings = {"eid": self._eid}
+        self._gdb.execute(script, bindings=bindings)
 
 
 class Vertex(Element):
@@ -113,6 +109,11 @@ class Vertex(Element):
     def __init__(self, vertex, gdb):
         super(Vertex, self).__init__(vertex, gdb)
         self._source = "V"
+
+    def _get_script(self):
+        # Bindings acting wierd for edge lookups...
+        script = """elem = g.%s(eid)""" % (self._source)
+        return script
 
     def add_edge(self, label, vertex):
         script = """vert1 = g.V(vid1).next();
@@ -150,10 +151,11 @@ class Vertex(Element):
 
         if label is None:
             script = """%s; elem.%sE()""" % (self._get_script(), pattern)
-            resp = self._gdb.execute(script)
+            bindings = {"eid": self._eid}
+            resp = self._gdb.execute(script, bindings=bindings)
         else:
             script = """%s; elem.%pE(l)""" % (self._get_script(), pattern)
-            bindings = {"l": label}
+            bindings = {"l": label, "eid": self._eid}
             resp = self._gdb.execute(script, bindings=bindings)
         return [self._edge_class(e, self._gdb) for e in resp.data]
 
@@ -173,6 +175,11 @@ class Edge(Element):
         self._in_vertex = edge["inV"]
         self._out_label = edge["outVLabel"]
         self._out_label = edge["inVLabel"]
+
+    def _get_script(self):
+        # Bindings acting wierd for edge lookups...
+        script = """elem = g.%s().has(id, eid)""" % (self._source)
+        return script
 
     def out_vertex(self):
         """
