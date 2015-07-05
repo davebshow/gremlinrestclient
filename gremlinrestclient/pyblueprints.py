@@ -4,7 +4,7 @@ from gremlinrestclient.client import GraphDatabase
 from gremlinrestclient.element import Element, Vertex, Edge
 
 
-__all__ = ("BlueprintsGraphDatabase", "BlueprintsElement", "BlueprintsVertex",
+__all__ = ("PyBlueprintsGraphDatabase", "BlueprintsElement", "BlueprintsVertex",
            "BlueprintsEdge")
 
 
@@ -60,11 +60,11 @@ class BlueprintsEdge(Edge, BlueprintsElement):
         return self._label
 
 
-class BlueprintsGraphDatabase(GraphDatabase):
+class PyBlueprintsGraphDatabase(GraphDatabase):
     """A Blueprints-like API in Python. Used to bind to legacy
     implementations"""
     def __init__(self, url="http://localhost:8182"):
-        super(BlueprintsGraphDatabase, self).__init__(
+        super(PyBlueprintsGraphDatabase, self).__init__(
             vertex_class=BlueprintsVertex, edge_class=BlueprintsEdge)
 
     def addVertex(self, _id=None):

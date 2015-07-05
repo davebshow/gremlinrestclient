@@ -1,6 +1,6 @@
 import unittest
 from gremlinrestclient import (GremlinRestClient, GremlinServerError,
-                               GraphDatabase, BlueprintsGraphDatabase)
+                               GraphDatabase, PyBlueprintsGraphDatabase)
 
 
 class GremlinRestClientTestCase(unittest.TestCase):
@@ -170,7 +170,7 @@ class GraphDatabaseCommandsTestCase(unittest.TestCase):
 class PyblueprintsTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = BlueprintsGraphDatabase()
+        self.client = PyBlueprintsGraphDatabase()
 
     def test_addVertex(self):
         v = self.client.addVertex()

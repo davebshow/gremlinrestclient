@@ -15,11 +15,11 @@ A HTTP client for the Gremlin Server.
 
 - A higher-level class :py:class:`GraphDatabase<gremlinrestclient.client.GraphDatabase>` that provides and object oriented API for creating and accessing nodes and edges.
 
-- A class :py:class:`BlueprintsGraphDatabase<gremlinrestclient.pyblueprints.BlueprintsGraphDatabase>` that implements the `pyblueprints`_ style API for easier integration with legacy systems.
+- A class :py:class:`PyBlueprintsGraphDatabase<gremlinrestclient.pyblueprints.PyBlueprintsGraphDatabase>` that implements the `pyblueprints`_ style API for easier integration with legacy systems.
 
 Releases
 ========
-The latest release of :py:mod:`gremlinrestclient` is **0.0.3**.
+The latest release of :py:mod:`gremlinrestclient` is **0.0.4**.
 
 
 Requirements
