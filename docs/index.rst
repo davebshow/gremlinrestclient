@@ -77,8 +77,8 @@ Consider the following example::
 
     >>> graph = gremlinrestclient.TinkerGraph()
     >>> d = {"name": "dave", "label": "person"}
-    >>> vertex = graph.create(d)
-    >>> vertex
+    >>> coll = graph.create(d)
+    >>> coll
     Collection(
         vertices=(
             Vertex(id=227, label=u'person', properties={u'name': [{u'id': 228, u'value': u'dave'}]}),), edges=())
