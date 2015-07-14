@@ -1,6 +1,5 @@
-from gremlinrestclient.pyblueprints import *
 from gremlinrestclient.client import *
-from gremlinrestclient.element import *
 from gremlinrestclient.exceptions import *
+from gremlinrestclient.graph import *
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"

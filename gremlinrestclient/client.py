@@ -4,10 +4,9 @@ import json
 import requests
 
 from gremlinrestclient.exceptions import RequestError, GremlinServerError
-from gremlinrestclient.element import Vertex, Edge
 
 
-__all__ = ("GremlinRestClient", "GraphDatabase", "Response")
+__all__ = ("GremlinRestClient", "Response")
 
 Response = collections.namedtuple(
     "Response",
@@ -56,96 +55,3 @@ class GremlinRestClient(object):
             else:
                 raise GremlinServerError(resp.status_code, msg)
         return resp
-
-
-class GraphDatabase(GremlinRestClient):
-    """
-    A high level interface for the Gremlin Server.
-    """
-    def __init__(self, url="http://localhost:8182", edge_class=Edge,
-                 vertex_class=Vertex):
-        super(GraphDatabase, self).__init__(url=url)
-        self._edge_class = edge_class
-        self._vertex_class = vertex_class
-
-    def add_vertex(self, label=None):
-        """
-        Adds a new vertex to the graph.
-
-        :params str label: Node label (optional)
-
-        :returns: The created
-            :py:class:`Vertex<gremlinrestclient.element.Vertex>`
-        """
-
-        if label is not None:
-            script = """graph.addVertex(label, vertex_label)"""
-            bindings = {"vertex_label": label}
-        else:
-            script = """graph.addVertex()"""
-            bindings = {}
-        resp = self.execute(script, bindings=bindings)
-        vertex = self._make_elem(resp, self._vertex_class)
-        return vertex
-
-    def vertex(self, vid):
-        """Get an existing vertex from the graph
-
-        :params int vid: Unique node identifier
-        :returns: The requested :py:class:`gremlinrestclient.element.Vertex`
-            or None
-        """
-        script = """g.V(vid)"""
-        bindings = {"vid": vid}
-        resp = self.execute(script, bindings=bindings)
-        vertex = self._make_elem(resp, self._vertex_class)
-        return vertex
-
-    def _make_elem(self, resp, elem_class):
-        try:
-            data = resp.data[0]
-        except IndexError:
-            elem = None
-        else:
-            elem = elem_class(data, self)
-        return elem
-
-    def vertices(self):
-        """
-        Get all vertices in graph.
-
-        :returns: :py:class:`list` of
-            :py:class:`Vertex<gremlinrestclient.element.Vertex>` objects
-        """
-        script = """g.V()"""
-        resp = self.execute(script)
-        vertices = [self._vertex_class(v, self) for v in resp.data]
-        return vertices
-
-    def edge(self, eid):
-        """Retrieves an existing edge from the graph
-
-        :params str eid: Unique edge identifier
-
-        :returns: The requested
-            :py:class:`Edge<gremlinrestclient.element.Edge>` or None
-        """
-        # Bindings don't seem to work here...
-        script = """g.E().has(id, eid)"""
-        bindings = {"eid": eid}
-        resp = self.execute(script, bindings=bindings)
-
-        edge = self._make_elem(resp, self._edge_class)
-        return edge
-
-    def edges(self):
-        """
-        Get all edges in graph.
-
-        :returns: :py:class:`list` of
-            :py:class:`Edge<gremlinrestclient.element.Edge>`
-        """
-        script = """g.E()"""
-        resp = self.execute(script)
-        edges = [self._edge_class(e, self) for e in resp.data]
-        return edges
