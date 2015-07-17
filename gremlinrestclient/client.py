@@ -48,7 +48,11 @@ class GremlinRestClient(object):
 
     def _post(self, url, data, headers):
         resp = requests.post(url, data=data, headers=headers)
-        if resp.status_code != 200:
+        status_code = resp.status_code
+        if status_code != 200:
+            if status_code == 403:
+                raise RuntimeError(
+                    "403 Forbidden: Server must be configured for REST")
             msg = resp.json()["message"]
             if resp.status_code < 500:
                 raise RequestError(resp.status_code, msg)
