@@ -3,7 +3,8 @@ import collections
 from gremlinrestclient.client import GremlinRestClient
 
 
-__all__ = ("TinkerGraph", "Graph", "Vertex", "Edge", "Collection")
+__all__ = ("TitanGraph", "TinkerGraph", "Graph", "Vertex", "Edge",
+           "Collection")
 
 
 Vertex = collections.namedtuple(
@@ -28,7 +29,7 @@ class Graph:
     for the Tinkerpop3 backends.
     """
     def __init__(self):
-        self._node_alias = 0
+        self._vertex_alias = 0
         self._edge_alias = 0
 
     def create(self, *elements):
@@ -40,28 +41,29 @@ class Graph:
             :py:class:`dict` that can be cast to a Vertex or a
             :py:class:`tuple` that can be cast to an Edge.
         """
-        self._node_alias_list = []
+        self._vertex_alias_list = []
         self._edge_alias_list = []
         self._param_id = 0
         vertices, edges = self._divide_elements(elements)
         vert_script, vert_bindings = self._parse_vertices(vertices)
         edge_script, edge_bindings = self._parse_edges(edges)
-        if self._node_alias_list:
-            node_alias = reduce(
-                lambda x, y: x + " ," + y, self._node_alias_list)
+        if self._vertex_alias_list:
+            vertex_alias = reduce(
+                lambda x, y: x + " ," + y, self._vertex_alias_list)
         else:
-            node_alias = ""
-        node_alias = "[" + node_alias + "]"
+            vertex_alias = ""
+        vertex_alias = "[" + vertex_alias + "]"
         if self._edge_alias_list:
             edge_alias = reduce(
                 lambda x, y: x + " ," + y, self._edge_alias_list)
         else:
             edge_alias = ""
         edge_alias = "[" + edge_alias + "]"
-        alias = "[%s, %s];" % (node_alias, edge_alias)
-        script = "%s%s%s" % (vert_script, edge_script, alias)
+        # alias is used to return the newly created edges/vertices
+        alias = "[%s, %s];" % (vertex_alias, edge_alias)
+        script = "%s%s" % (vert_script, edge_script)
         vert_bindings.update(edge_bindings)
-        return script, vert_bindings
+        return script, vert_bindings, alias
 
     def _divide_elements(self, elements):
         """
@@ -105,8 +107,8 @@ class Graph:
 
     def _build_vertex(self, vertex):
         vertex_dict = {}
-        alias = "v%s" % str(self._node_alias)
-        self._node_alias += 1
+        alias = "v%s" % str(self._vertex_alias)
+        self._vertex_alias += 1
         if isinstance(vertex, Vertex):
             vertex_dict = vertex._asdict()
             vertex_dict["alias"] = alias
@@ -133,7 +135,7 @@ class Graph:
                 script += "%s = g.V(%s).next();" % (alias, param)
                 bindings[param] = vertex["id"]
             else:
-                self._node_alias_list.append(alias)
+                self._vertex_alias_list.append(alias)
                 add_vertex = "%s = graph.addVertex(" % alias
                 label = vertex["label"]
                 props = vertex["properties"]
@@ -170,14 +172,16 @@ class Graph:
         return script, bindings
 
 
-class TinkerGraph(GremlinRestClient, Graph):
+class BaseGraph(GremlinRestClient, Graph):
 
     def __init__(self, url="http://localhost:8182"):
         GremlinRestClient.__init__(self, url=url)
         Graph.__init__(self)
 
-    def create(self, *elements):
-        script, bindings = Graph.create(self, *elements)
+    def create(self):
+        raise NotImplementedError
+
+    def _create(self, script, bindings):
         resp = self.execute(script, bindings=bindings)
         data = resp.data
         vertices = tuple(Vertex(v["id"],
@@ -190,3 +194,25 @@ class TinkerGraph(GremlinRestClient, Graph):
                            e.get("properties", {})) for e in data[1])
         collection = Collection(vertices, edges)
         return collection
+
+
+class TinkerGraph(BaseGraph):
+
+    def __init__(self, url="http://localhost:8182"):
+        super(TinkerGraph, self).__init__(url=url)
+
+    def create(self, *elements):
+        script, bindings, alias = Graph.create(self, *elements)
+        script = "%s%s" % (script, alias)
+        return self._create(script, bindings)
+
+
+class TitanGraph(BaseGraph):
+
+    def __init__(self, url="http://localhost:8182"):
+        super(TitanGraph, self).__init__(url=url)
+
+    def create(self, *elements):
+        script, bindings, alias = Graph.create(self, *elements)
+        script = "%s%s%s" % (script, "graph.tx().commit();", alias)
+        return self._create(script, bindings)

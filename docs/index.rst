@@ -20,14 +20,14 @@ A HTTP client for the Gremlin Server.
 
 Releases
 ========
-The latest release of :py:mod:`gremlinrestclient` is **0.0.5**.
+The latest release of :py:mod:`gremlinrestclient` is **0.0.6**.
 
 
 Requirements
 ============
 
 - Python 2.7-3.4
-- Tinkerpop 3 Gremlin Server 3.0.0.M9
+- Tinkerpop 3 Gremlin Server 3.0.0 (3.0.0.M9 for use with Titan 0.9.0-M2)
 
 
 Dependencies
