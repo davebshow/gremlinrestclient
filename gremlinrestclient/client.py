@@ -15,10 +15,10 @@ Response = collections.namedtuple(
 
 class GremlinRestClient(object):
 
+    HEADERS = {'content-type': 'application/json'}
+
     def __init__(self, url="http://localhost:8182"):
         self._url = url
-        self._session = requests.Session()
-        self._session.headers.update({'content-type': 'application/json'})
 
     def execute(self, gremlin, bindings=None, lang="gremlin-groovy"):
         """
@@ -46,7 +46,7 @@ class GremlinRestClient(object):
         return resp
 
     def _post(self, url, data):
-        resp = self._session.post(url, data=data)
+        resp = requests.post(url, data=data, headers=self.HEADERS)
         status_code = resp.status_code
         if status_code != 200:
             if status_code == 403:

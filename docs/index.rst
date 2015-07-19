@@ -20,7 +20,7 @@ A HTTP client for the Gremlin Server.
 
 Releases
 ========
-The latest release of :py:mod:`gremlinrestclient` is **0.0.6**.
+The latest release of :py:mod:`gremlinrestclient` is **0.0.7**.
 
 
 Requirements
