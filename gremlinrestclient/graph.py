@@ -48,14 +48,12 @@ class Graph:
         vert_script, vert_bindings = self._parse_vertices(vertices)
         edge_script, edge_bindings = self._parse_edges(edges)
         if self._vertex_alias_list:
-            vertex_alias = reduce(
-                lambda x, y: x + " ," + y, self._vertex_alias_list)
+            vertex_alias = ",".join(self._vertex_alias_list)
         else:
             vertex_alias = ""
         vertex_alias = "[" + vertex_alias + "]"
         if self._edge_alias_list:
-            edge_alias = reduce(
-                lambda x, y: x + " ," + y, self._edge_alias_list)
+            edge_alias = ",".join(self._edge_alias_list)
         else:
             edge_alias = ""
         edge_alias = "[" + edge_alias + "]"
