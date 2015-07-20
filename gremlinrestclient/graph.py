@@ -170,14 +170,16 @@ class Graph:
         return script, bindings
 
 
-class BaseGraph(GremlinRestClient, Graph):
+class TinkerGraph(GremlinRestClient, Graph):
 
     def __init__(self, url="http://localhost:8182"):
         GremlinRestClient.__init__(self, url=url)
         Graph.__init__(self)
 
-    def create(self):
-        raise NotImplementedError
+    def create(self, *elements):
+        script, bindings, alias = Graph.create(self, *elements)
+        script = "%s%s" % (script, alias)
+        return self._create(script, bindings)
 
     def _create(self, script, bindings):
         resp = self.execute(script, bindings=bindings)
@@ -194,18 +196,7 @@ class BaseGraph(GremlinRestClient, Graph):
         return collection
 
 
-class TinkerGraph(BaseGraph):
-
-    def __init__(self, url="http://localhost:8182"):
-        super(TinkerGraph, self).__init__(url=url)
-
-    def create(self, *elements):
-        script, bindings, alias = Graph.create(self, *elements)
-        script = "%s%s" % (script, alias)
-        return self._create(script, bindings)
-
-
-class TitanGraph(BaseGraph):
+class TitanGraph(TinkerGraph):
 
     def __init__(self, url="http://localhost:8182"):
         super(TitanGraph, self).__init__(url=url)
