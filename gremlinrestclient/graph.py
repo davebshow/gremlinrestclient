@@ -44,6 +44,7 @@ class Graph:
         self._vertex_alias_list = []
         self._edge_alias_list = []
         self._param_id = 0
+
         vertices, edges = self._divide_elements(elements)
         vert_script, vert_bindings = self._parse_vertices(vertices)
         edge_script, edge_bindings = self._parse_edges(edges)
@@ -128,7 +129,7 @@ class Graph:
         for vertex in vertices:
             vid = vertex["id"]
             alias = vertex["alias"]
-            if vid:
+            if vid != "":
                 param = self._get_param()
                 script += "%s = g.V(%s).next();" % (alias, param)
                 bindings[param] = vertex["id"]
