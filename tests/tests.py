@@ -54,6 +54,24 @@ class GraphTestCase(unittest.TestCase):
         in_v, = resp.vertices
         self.assertEqual(edge.target_id, in_v.id)
 
+    def test_create_multiple(self):
+        p = {"label": "lang", "name": "python"}
+        d = {"label": "person", "name": "dave", "age": 34}
+        f = {"label": "person", "name": "frens", "age": 34}
+        resp = self.graph.create(
+            p,
+            (d, 'KNOWNS', 0),
+            (f, 'KNOWNS', p),
+        )
+        self.assertEqual(len(resp.vertices), 3)
+        self.assertEqual(len(resp.edges), 2)
+        e1, e2 = resp.edges
+        v1, v2, v3 = resp.vertices
+        self.assertEqual(e1.source_id, v2.id)
+        self.assertEqual(e1.target_id, v1.id)
+        self.assertEqual(e2.source_id, v3.id)
+        self.assertEqual(e2.target_id, v1.id)
+
 
 class TitanGraphTestCase(unittest.TestCase):
 

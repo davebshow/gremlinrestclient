@@ -68,54 +68,53 @@ class Graph:
         """
         A bit ugly, but this parses the mumbo jumbo the user can pass.
         """
-        vertices = []
+        vertices = {}
         edges = []
-        args_list = list(elements)
         for arg in elements:
-            # Process edges first.
-            if isinstance(arg, tuple):
-                source = arg[0]
-                label = arg[1]
-                target = arg[2]
-                try:
-                    properties = arg[3]
-                except IndexError:
-                    properties = {}
-                source_vertex = self._process_vertex(
-                    source, elements, args_list)
-                target_vertex = self._process_vertex(
-                    target, elements, args_list)
-                vertices.append(source_vertex)
-                vertices.append(target_vertex)
+            if isinstance(arg, dict):
+                vertices[id(arg)] = self._process_vertex(arg, vertices, elements)
+            elif isinstance(arg, tuple):
+                source, label, target = arg[:3]
+                properties = arg[4:4] or {}
+                source_vertex = self._process_vertex(source, vertices, elements)
+                target_vertex = self._process_vertex(target, vertices, elements)
                 alias = "e%s" % str(self._edge_alias)
-                edge = (source_vertex, label, target_vertex, properties, alias)
+                self._edge_alias += 1
+                edge = source_vertex, label, target_vertex, properties, alias
                 edges.append(edge)
-                args_list.remove(arg)
-        # Process any left over nodes not bound to an edge.
-        for arg in args_list:
-            vertex = self._build_vertex(arg)
-            vertices.append(vertex)
-        return vertices, edges
+            else:
+                raise ValueError('%s not supported, use dict for vertices and tuple for edges')
+        return vertices.values(), edges
 
-    def _process_vertex(self, vertex, elements, args_list):
+    def _process_vertex(self, vertex, vertices, elements):
         if isinstance(vertex, int):
             vertex = elements[vertex]
-            args_list.remove(vertex)
-        vertex = self._build_vertex(vertex)
-        return vertex
+        ptr = id(vertex)
+        known_vertex = ptr in vertices
+        if known_vertex:
+            vertex = vertices[ptr]
+        vertex_dict = self._build_vertex(vertex)
+        if not known_vertex:
+            vertices[ptr] = vertex_dict
+        return vertex_dict
 
     def _build_vertex(self, vertex):
-        vertex_dict = {}
-        alias = "v%s" % str(self._vertex_alias)
-        self._vertex_alias += 1
         if isinstance(vertex, Vertex):
             vertex_dict = vertex._asdict()
-            vertex_dict["alias"] = alias
+        elif isinstance(vertex, dict):
+            if 'alias' in vertex:
+                return vertex
+            else:
+                vertex_dict = {}
+                vertex_dict["label"] = vertex.pop("label", "")
+                vertex_dict["id"] = ""  # Clobbered
+                vertex_dict["properties"] = vertex
         else:
-            vertex_dict["label"] = vertex.pop("label", "")
-            vertex_dict["id"] = ""  # Clobbered
-            vertex_dict["properties"] = vertex
-            vertex_dict["alias"] = alias
+            raise ValueError('%s can\'t be a vertex' % type(vertex))
+
+        alias = "v%s" % str(self._vertex_alias)
+        self._vertex_alias += 1
+        vertex_dict["alias"] = alias
         return vertex_dict
 
     def _get_param(self):
