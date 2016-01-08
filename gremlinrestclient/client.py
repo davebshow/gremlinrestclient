@@ -41,8 +41,8 @@ class GremlinRestClient(object):
         resp = resp.json()
         resp = Response(resp["status"]["code"],
                         resp["result"]["data"],
-                        resp["result"]["meta"],
-                        resp["status"]["message"])
+                        resp["status"]["message"],
+                        resp["result"]["meta"])
         return resp
 
     def _post(self, url, data):
