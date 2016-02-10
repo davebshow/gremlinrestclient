@@ -75,7 +75,7 @@ class Graph:
                 vertices[id(arg)] = self._process_vertex(arg, vertices, elements)
             elif isinstance(arg, tuple):
                 source, label, target = arg[:3]
-                properties = arg[3] or {}
+                properties = arg[3:4] or {}
                 source_vertex = self._process_vertex(source, vertices, elements)
                 target_vertex = self._process_vertex(target, vertices, elements)
                 alias = "e%s" % str(self._edge_alias)
