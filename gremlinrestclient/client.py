@@ -20,7 +20,7 @@ class GremlinRestClient(object):
     def __init__(self, url="http://localhost:8182"):
         self._url = url
 
-    def execute(self, gremlin, bindings=None, lang="gremlin-groovy"):
+    def execute(self, gremlin, bindings=None, lang="gremlin-groovy", query_timeout=None):
         """
         Send a script to the Gremlin Server
 
@@ -37,7 +37,7 @@ class GremlinRestClient(object):
             "bindings": bindings,
             "language": lang
         }
-        resp = self._post(self._url, json.dumps(payload))
+        resp = self._post(self._url, json.dumps(payload), query_timeout)
         resp = resp.json()
         resp = Response(resp["status"]["code"],
                         resp["result"]["data"],
@@ -45,8 +45,8 @@ class GremlinRestClient(object):
                         resp["result"]["meta"])
         return resp
 
-    def _post(self, url, data):
-        resp = requests.post(url, data=data, headers=self.HEADERS)
+    def _post(self, url, data, post_timeout=None):
+        resp = requests.post(url, data=data, headers=self.HEADERS, timeout=post_timeout)
         status_code = resp.status_code
         if status_code != 200:
             if status_code == 403:
